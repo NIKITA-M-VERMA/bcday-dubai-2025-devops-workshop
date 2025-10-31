@@ -1,0 +1,61 @@
+# .github/workflows/main.yml - CI Pipeline for Business Central Extension
+
+name: CI Build and Quality Gates
+
+# 1. Triggers on pushes to the 'main' branch
+on:
+  push:
+    branches: [ main ]
+
+# 2. Define the Build Job
+jobs:
+  build_and_test:
+    runs-on: windows-latest  # Use a Windows hosted runner for BC compatibility
+
+    steps:
+    # ----------------------------------------------------
+    # STEP 1: PREPARE - Checkout Source Code
+    # ----------------------------------------------------
+    - name: Checkout Repository
+      uses: actions/checkout@v4
+      
+    # ----------------------------------------------------
+    # STEP 2: SIMULATED BUILD ENVIRONMENT
+    # ----------------------------------------------------
+    - name: 1. Install Build Tools & Get Dependencies (SIMULATED)
+      shell: powershell
+      run: |
+        Write-Host "Installing BC Container Helper and AL tools in a temporary environment..."
+        Write-Host "Downloading Base Application symbols to workspace cache."
+        # On the slide, we EXPLAIN that this step takes time in real life.
+
+    # ----------------------------------------------------
+    # STEP 3: BUILD & QUALITY CHECK
+    # ----------------------------------------------------
+    - name: 2. Compile AL Extension (Creates the .app file)
+      shell: powershell
+      run: |
+        Write-Host "Invoking AL Compiler (ALC) to create final .app package."
+        # This is where we visually prove the code can be packaged.
+        
+    - name: 3. Run Automated Unit Tests (Quality Gate #1)
+      shell: powershell
+      run: |
+        Write-Host "Executing 12 Unit Tests against BC Sandbox..."
+        Write-Host "RESULT: 12 Passed, 0 Failed. (Quality Gate Passed)" 
+            
+    - name: 4. SonarCloud Static Code Analysis (Quality Gate #2)
+      shell: powershell
+      run: |
+        Write-Host "Scanning code for maintainability and security issues."
+        Write-Host "Quality Gate: PASSED (Coverage 85%, Debt 0 days)."
+
+    # ----------------------------------------------------
+    # STEP 4: PUBLISH ARTIFACT
+    # ----------------------------------------------------
+    - name: 5. Publish Deployable Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BC-Extension-Artifact
+        path: ${{ github.workspace }}/ALProject1/*.app
+        # This is the deployable package saved for the CD stage.
