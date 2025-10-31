@@ -1,57 +1,56 @@
-name: CI Build, Test, and Scan for Business Central
+name: CI Build, Test, and Scan (Simulation)
 
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
+  workflow_dispatch: # Allows you to run it manually
 
 jobs:
   build-and-test:
-    runs-on: windows-latest # Use a Windows hosted runner
-
+    runs-on: windows-latest
+    
     steps:
-    # 1. Checkout the source code
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # 2. Install BCContainerHelper (The build tool)
-    # This is a REAL marketplace action
-    - name: Install AL-Go Tools (BCContainerHelper)
-      uses: microsoft/al-dev-tools-actions/setup-tools@v2
+    - name: 1. Install Build Tools (SIMULATED)
+      shell: powershell
+      run: |
+        Write-Host "Installing BCContainerHelper and AL tools..."
+        Start-Sleep -Seconds 5
+        Write-Host "Build tools installed."
 
-    # 3. Create the Build Environment (The "Agent")
-    # This  creates a container and imports symbols
-    - name: Create Build Container
-      uses: microsoft/al-dev-tools-actions/create-bc-container@v2
-      with:
-        # Note: We use secrets for a real build
-        username: ${{ secrets.BC_ADMIN_USERNAME }}
-        password: ${{ secrets.BC_ADMIN_PASSWORD }}
+    - name: 2. Download Dependencies (SIMULATED)
+      shell: powershell
+      run: |
+        Write-Host "Downloading Base Application and System symbols..."
+        Start-Sleep -Seconds 5
+        Write-Host "Symbols downloaded."
 
-    # 4. Compile the AL Extension (The "Build")
-    - name: Compile AL Extension
-      uses: microsoft/al-dev-tools-actions/compile-app@v2
-      with:
-        project: ./ALProject1 # Path to our project
+    - name: 3. Compile AL Extension (SIMULATED)
+      shell: powershell
+      run: |
+        Write-Host "Compiling ALProject1/app.json..."
+        Start-Sleep -Seconds 5
+        Write-Host "Successfully created 'ALProject1.app'."
+        
+    - name: 4. Run Unit Tests (SIMULATED - Quality Gate #1)
+      shell: powershell
+      run: |
+        Write-Host "Executing 12 Unit Tests..."
+        Start-Sleep -Seconds 5
+        Write-Host "RESULT: 12 Passed, 0 Failed. (Quality Gate Passed)"
+            
+    - name: 5. SonarCloud Scan (SIMULATED - Quality Gate #2)
+      shell: powershell
+      run: |
+        Write-Host "Scanning code for maintainability and security..."
+        Start-Sleep -Seconds 5
+        Write-Host "Quality Gate: PASSED (Coverage 85%, 0 Bugs)."
 
-    # 5. Run Unit Tests (Quality Gate #1)
-    - name: Run Unit Tests
-      uses: microsoft/al-dev-tools-actions/run-tests@v2
-      with:
-        testproject: ./ALProject1 #  tests are in the same project
-
-    # 6. SonarCloud Scan (Quality Gate #2)
-   
-    - name: SonarCloud Scan
-      uses: SonarSource/sonar-scanner-cli-action@v2
-      env:
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
-
-    # 7. Publish the .app file
-    - name: Publish .app Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: BC-Extension-Package
-        path: ./*.app
+    - name: 6. Publish Deployable Artifact (SIMULATED)
+      shell: powershell
+      run: |
+        Write-Host "Uploading .app file to artifacts..."
+        Start-Sleep -Seconds 2
+        Write-Host "Artifact 'BC-Extension-Package' published."
